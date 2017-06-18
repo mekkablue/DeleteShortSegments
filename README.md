@@ -36,7 +36,7 @@ Or with any of the `maxlength` and `passes` options:
 
 `maxlength` is the default threshold size (in units) below which the segment will be deleted. Default: 1 unit. 
 
-`passes` is the amount of times the filter goes through all your paths. By default, the filter goes *twice* through your paths. A single pass sometimes misses a few cases, especially if a couple of short segments follow each other.
+`passes` is the amount of times the filter goes through all your paths. By default, the filter goes *twice* through your paths. A single pass is significantly faster, but sometimes misses a few cases, especially if a couple of short segments follow each other.
 
 ### Requirements
 
