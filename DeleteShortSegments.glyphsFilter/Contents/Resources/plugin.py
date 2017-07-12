@@ -33,10 +33,10 @@ class DeleteShortSegments(FilterWithoutDialog):
 				pass
 
 		try:
-			passes = float(customParameters["passes"])
+			passes = int(customParameters["passes"])
 		except:
 			try:
-				passes = float(customParameters["passes"])
+				passes = int(customParameters["passes"])
 			except:
 				pass
 		
