@@ -3,56 +3,108 @@
 ###########################################################################################################
 #
 #
-#	Filter without dialog Plugin
+#	Filter with dialog Plugin
 #
 #	Read the docs:
-#	https://github.com/schriftgestalt/GlyphsSDK/tree/master/Python%20Templates/Filter%20without%20Dialog
+#	https://github.com/schriftgestalt/GlyphsSDK/tree/master/Python%20Templates/Filter%20with%20Dialog
+#
+#	For help on the use of Interface Builder:
+#	https://github.com/schriftgestalt/GlyphsSDK/tree/master/Python%20Templates
 #
 #
 ###########################################################################################################
 
-
+import objc
+from GlyphsApp import *
 from GlyphsApp.plugins import *
 
-class DeleteShortSegments(FilterWithoutDialog):
+class DeleteShortSegments(FilterWithDialog):
+	
+	# Definitions of IBOutlets
+	dialog = objc.IBOutlet()
+	maxLengthField = objc.IBOutlet()
+	passesField = objc.IBOutlet()
 	
 	def settings(self):
-		self.menuName = Glyphs.localize({'en': u'Delete Short Segments', 'de': u'Kurze Segmente löschen'})
-		self.keyboardShortcut = None # With Cmd+Shift
-
+		self.menuName = Glyphs.localize({
+			'en': u'Delete Short Segments',
+			'de': u'Kurze Segmente löschen',
+		})
+		# Load dialog from .nib (without .extension)
+		self.loadNib('IBdialog', __file__)
+	
+	# On dialog show
+	def start(self):
+		Glyphs.registerDefault( "com.mekkablue.DeleteShortSegments.maxLength", 1.0 )
+		Glyphs.registerDefault( "com.mekkablue.DeleteShortSegments.passes", 2 )
+				
+		# Set value of fields:
+		self.maxLengthField.setStringValue_( Glyphs.defaults['com.mekkablue.DeleteShortSegments.maxLength'] )
+		self.passesField.setStringValue_( Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes'] )
+		
+		# Set focus to 1st field:
+		self.maxLengthField.becomeFirstResponder()
+		
+	# Actions triggered by UI:
+	@objc.IBAction
+	def setMaxLength_( self, sender ):
+		Glyphs.defaults['com.mekkablue.DeleteShortSegments.maxLength'] = sender.floatValue()
+		self.update()
+	
+	@objc.IBAction
+	def setPasses_( self, sender ):
+		Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes'] = sender.intValue()
+		self.update()
+	
+	# Actual filter
 	def filter(self, thisLayer, inEditView, customParameters):
-		maxLength = 1.0
-		passes = 2
+		# Called on font export:
+		if not inEditView:
+			if customParameters.has_key('maxLength'):
+				maxLength = float(customParameters['maxLength'])
+			elif customParameters.has_key('maxlength'): # potential misspelling (lowercase l)
+				maxLength = float(customParameters['maxlength'])
+			else:
+				maxLength = 1.0 # fallback
+				
+			if customParameters.has_key('passes'):
+				passes = int(customParameters['passes'])
+			else:
+				passes = 2 # fallback
 		
-		try:
-			maxLength = float(customParameters["maxlength"])
-		except:
-			try:
-				maxLength = float(customParameters["maxLength"])
-			except:
-				pass
-
-		try:
-			passes = int(customParameters["passes"])
-		except:
-			try:
-				passes = int(customParameters["passes"])
-			except:
-				pass
+		# Called by the user in the UI:
+		else:
+			maxLength = float(Glyphs.defaults['com.mekkablue.DeleteShortSegments.maxLength'])
+			passes = int(Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes'])
 		
+		passes = min( 1, passes )
+		maxLength min( 0.1, maxLength )
+		hasRemovedSegments = True
 		for x in range(passes):
-			for thisPath in thisLayer.paths:
-				for i in range(len(thisPath.nodes))[::-1]:
-					thisNode = thisPath.nodes[i]
-					nextNode = thisNode.nextNode
-					if nextNode.type != OFFCURVE and thisNode.type != OFFCURVE:
-						xDistance = thisNode.x-nextNode.x
-						yDistance = thisNode.y-nextNode.y
-						if abs(xDistance) < maxLength and abs(yDistance) < maxLength:
-							if (not inEditView) or (nextNode in thisLayer.selection or thisNode in thisLayer.selection) or (not thisLayer.selection):
-								thisPath.removeNodeCheckKeepShape_( thisNode )
+			if hasRemovedSegments: 
+				# if no segments were removed in pass 2, do nothing in passes 3+
+				# (faster if user enters too many passes)
+				hasRemovedSegments = False
+				for thisPath in thisLayer.paths:
+					for i in range(len(thisPath.nodes))[::-1]: # go backwards through nodes, so i remains correct
+						thisNode = thisPath.nodes[i]
+						nextNode = thisNode.nextNode
+						if nextNode.type != OFFCURVE and thisNode.type != OFFCURVE:
+							xDistance = thisNode.x-nextNode.x
+							yDistance = thisNode.y-nextNode.y
+							distance = ( xDistance**2 + yDistance**2 ) ** 0.5 # Hypotenuse
+							if distance < maxLength:
+								if (not inEditView) or (nextNode in thisLayer.selection or thisNode in thisLayer.selection) or (not thisLayer.selection):
+									thisPath.removeNodeCheckKeepShape_( thisNode )
+									hasRemovedSegments = True # OK to start another pass
+	
+	def generateCustomParameter( self ):
+		return "%s; maxLength:%.1f; passes:%i" % (
+			self.__class__.__name__,
+			Glyphs.defaults['com.mekkablue.DeleteShortSegments.maxLength'],
+			Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes'],
+		)
 	
 	def __file__(self):
 		"""Please leave this method unchanged"""
 		return __file__
-	
