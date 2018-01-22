@@ -78,7 +78,7 @@ class DeleteShortSegments(FilterWithDialog):
 			passes = int(Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes'])
 		
 		passes = min( 1, passes )
-		maxLength min( 0.1, maxLength )
+		maxLength = min( 0.1, maxLength )
 		hasRemovedSegments = True
 		for x in range(passes):
 			if hasRemovedSegments: 

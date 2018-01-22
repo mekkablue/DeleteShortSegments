@@ -17,15 +17,15 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleVersion</key>
-	<string>4</string>
+	<string>5</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0</string>
+	<string>2.0.1</string>
 	<key>UpdateFeedURL</key>
 	<string>https://raw.githubusercontent.com/mekkablue/DeleteShortSegments/master/DeleteShortSegments.glyphsFilter/Contents/Info.plist</string>
 	<key>productPageURL</key>
 	<string>https://github.com/mekkablue/DeleteShortSegments</string>
 	<key>productReleaseNotes</key>
-	<string>Added GUI, updated to latest codebase.</string>
+	<string>Fixed a bug that would prevent the plug-in from running.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright, Rainer Erich Scheichelbauer, 2017-2018</string>
 	<key>NSPrincipalClass</key>
