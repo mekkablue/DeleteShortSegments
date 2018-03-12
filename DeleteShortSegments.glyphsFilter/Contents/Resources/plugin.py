@@ -77,15 +77,20 @@ class DeleteShortSegments(FilterWithDialog):
 			maxLength = float(Glyphs.defaults['com.mekkablue.DeleteShortSegments.maxLength'])
 			passes = int(Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes'])
 		
-		passes = min( 1, passes )
-		maxLength = min( 0.1, maxLength )
+		# safeguards:
+		passes = max( 1, passes )
+		maxLength = max( 0.1, maxLength )
+		
 		hasRemovedSegments = True
-		for x in range(passes):
+		for x in xrange(passes):
 			if hasRemovedSegments: 
 				# if no segments were removed in pass 2, do nothing in passes 3+
 				# (faster if user enters too many passes)
 				hasRemovedSegments = False
 				for thisPath in thisLayer.paths:
+					# brings macro window to front and clears its log:
+					Glyphs.clearLog()
+					Glyphs.showMacroWindow()
 					for i in range(len(thisPath.nodes))[::-1]: # go backwards through nodes, so i remains correct
 						thisNode = thisPath.nodes[i]
 						nextNode = thisNode.nextNode
