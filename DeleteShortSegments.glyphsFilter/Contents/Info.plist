@@ -17,15 +17,15 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleVersion</key>
-	<string>6</string>
+	<string>7</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0.2</string>
+	<string>2.0.3</string>
 	<key>UpdateFeedURL</key>
 	<string>https://raw.githubusercontent.com/mekkablue/DeleteShortSegments/master/DeleteShortSegments.glyphsFilter/Contents/Info.plist</string>
 	<key>productPageURL</key>
 	<string>https://github.com/mekkablue/DeleteShortSegments</string>
 	<key>productReleaseNotes</key>
-	<string>Fixed another bug that would prevent the plug-in from running.</string>
+	<string>Fixed constant reopening of Macro Window (thx Ben Hodosi).</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright, Rainer Erich Scheichelbauer, 2017-2018</string>
 	<key>NSPrincipalClass</key>

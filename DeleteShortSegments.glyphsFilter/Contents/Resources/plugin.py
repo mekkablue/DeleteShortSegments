@@ -88,9 +88,6 @@ class DeleteShortSegments(FilterWithDialog):
 				# (faster if user enters too many passes)
 				hasRemovedSegments = False
 				for thisPath in thisLayer.paths:
-					# brings macro window to front and clears its log:
-					Glyphs.clearLog()
-					Glyphs.showMacroWindow()
 					for i in range(len(thisPath.nodes))[::-1]: # go backwards through nodes, so i remains correct
 						thisNode = thisPath.nodes[i]
 						nextNode = thisNode.nextNode
