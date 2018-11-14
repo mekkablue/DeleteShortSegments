@@ -29,7 +29,17 @@ class DeleteShortSegments(FilterWithDialog):
 		self.menuName = Glyphs.localize({
 			'en': u'Delete Short Segments',
 			'de': u'Kurze Segmente löschen',
+			'es': u'Borrar segmentos cortos',
+			'fr': u'Supprimer segments courts',
 		})
+
+		self.actionButtonLabel = Glyphs.localize({
+			'en': u'Delete',
+			'de': u'Löschen',
+			'es': u'Borrar',
+			'fr': u'Supprimer',
+		})
+
 		# Load dialog from .nib (without .extension)
 		self.loadNib('IBdialog', __file__)
 	
