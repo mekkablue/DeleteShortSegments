@@ -1,4 +1,5 @@
 # encoding: utf-8
+from __future__ import division, print_function, unicode_literals
 
 ###########################################################################################################
 #
@@ -25,12 +26,13 @@ class DeleteShortSegments(FilterWithDialog):
 	maxLengthField = objc.IBOutlet()
 	passesField = objc.IBOutlet()
 	
+	@objc.python_method
 	def settings(self):
 		self.menuName = Glyphs.localize({
-			'en': u'Delete Short Segments',
-			'de': u'Kurze Segmente löschen',
-			'es': u'Borrar segmentos cortos',
-			'fr': u'Supprimer segments courts',
+			'en': 'Delete Short Segments',
+			'de': 'Kurze Segmente löschen',
+			'es': 'Borrar segmentos cortos',
+			'fr': 'Supprimer segments courts',
 		})
 
 		self.actionButtonLabel = Glyphs.localize({
@@ -44,6 +46,7 @@ class DeleteShortSegments(FilterWithDialog):
 		self.loadNib('IBdialog', __file__)
 	
 	# On dialog show
+	@objc.python_method
 	def start(self):
 		Glyphs.registerDefault( "com.mekkablue.DeleteShortSegments.maxLength", 1.0 )
 		Glyphs.registerDefault( "com.mekkablue.DeleteShortSegments.passes", 2 )
@@ -67,17 +70,18 @@ class DeleteShortSegments(FilterWithDialog):
 		self.update()
 	
 	# Actual filter
+	@objc.python_method
 	def filter(self, thisLayer, inEditView, customParameters):
 		# Called on font export:
 		if not inEditView:
-			if customParameters.has_key('maxLength'):
+			if 'maxLength' in customParameters:
 				maxLength = float(customParameters['maxLength'])
-			elif customParameters.has_key('maxlength'): # potential misspelling (lowercase l)
+			elif 'maxlength' in customParameters: # potential misspelling (lowercase l)
 				maxLength = float(customParameters['maxlength'])
 			else:
 				maxLength = 1.0 # fallback
 				
-			if customParameters.has_key('passes'):
+			if 'passes' in customParameters:
 				passes = int(customParameters['passes'])
 			else:
 				passes = 2 # fallback
@@ -92,7 +96,7 @@ class DeleteShortSegments(FilterWithDialog):
 		maxLength = max( 0.1, maxLength )
 		
 		hasRemovedSegments = True
-		for x in xrange(passes):
+		for x in range(passes):
 			if hasRemovedSegments: 
 				# if no segments were removed in pass 2, do nothing in passes 3+
 				# (faster if user enters too many passes)
@@ -110,6 +114,7 @@ class DeleteShortSegments(FilterWithDialog):
 									thisPath.removeNodeCheckKeepShape_( thisNode )
 									hasRemovedSegments = True # OK to start another pass
 	
+	@objc.python_method
 	def generateCustomParameter( self ):
 		return "%s; maxLength:%.1f; passes:%i" % (
 			self.__class__.__name__,
@@ -117,6 +122,7 @@ class DeleteShortSegments(FilterWithDialog):
 			Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes'],
 		)
 	
+	@objc.python_method
 	def __file__(self):
 		"""Please leave this method unchanged"""
 		return __file__
