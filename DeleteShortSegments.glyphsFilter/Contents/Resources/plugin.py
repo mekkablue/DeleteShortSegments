@@ -19,6 +19,22 @@ import objc
 from GlyphsApp import *
 from GlyphsApp.plugins import *
 
+def bezier(p1, p2, p3, p4, t):
+	"""
+	Returns coordinates for t (=0.0...1.0) on curve segment.
+	x1,y1 and x4,y4: coordinates of on-curve nodes
+	x2,y2 and x3,y3: coordinates of BCPs
+	"""
+	x1, y1 = p1.x, p1.y
+	x2, y2 = p2.x, p2.y
+	x3, y3 = p3.x, p3.y
+	x4, y4 = p4.x, p4.y
+	
+	x = x1*(1-t)**3 + x2*3*t*(1-t)**2 + x3*3*t**2*(1-t) + x4*t**3
+	y = y1*(1-t)**3 + y2*3*t*(1-t)**2 + y3*3*t**2*(1-t) + y4*t**3
+
+	return x, y
+
 class DeleteShortSegments(FilterWithDialog):
 	
 	# Definitions of IBOutlets
@@ -68,7 +84,23 @@ class DeleteShortSegments(FilterWithDialog):
 	def setPasses_( self, sender ):
 		Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes'] = sender.intValue()
 		self.update()
-	
+
+	@objc.python_method
+	def segmentLength(self, segment, precision=25):
+		if len(segment) == 2:
+			p0,p1 = segment
+			return distance(p0,p1) # this is Glyphs convenience method
+		elif len(segment) == 4:
+			p0,p1,p2,p3 = segment
+			previousPoint = p0
+			length = 0
+			for i in range(precision):
+				t = (i+1.0)/precision
+				currentPoint = bezier( p0,p1,p2,p3, t )
+				length += distance(previousPoint,currentPoint)
+				previousPoint = currentPoint
+			return length
+			
 	# Actual filter
 	@objc.python_method
 	def filter(self, thisLayer, inEditView, customParameters):
@@ -106,20 +138,24 @@ class DeleteShortSegments(FilterWithDialog):
 						thisNode = thisPath.nodes[i]
 						nextNode = thisNode.nextNode
 						if nextNode.type != OFFCURVE and thisNode.type != OFFCURVE:
-							xDistance = thisNode.x-nextNode.x
-							yDistance = thisNode.y-nextNode.y
-							distance = ( xDistance**2 + yDistance**2 ) ** 0.5 # Hypotenuse
-							if distance < maxLength:
+							if self.segmentLength((thisNode.position, nextNode.position)) < maxLength:
 								if (not inEditView) or (nextNode in thisLayer.selection or thisNode in thisLayer.selection) or (not thisLayer.selection):
 									thisPath.removeNodeCheckKeepShape_( thisNode )
 									hasRemovedSegments = True # OK to start another pass
+						elif thisNode.type == OFFCURVE and nextNode.type == OFFCURVE and nextNode.nextNode.type == CURVE:
+							if self.segmentLength((thisNode.prevNode.position, thisNode.position, nextNode.position, nextNode.nextNode.position)) < maxLength:
+								if (not inEditView) or (nextNode in thisLayer.selection or thisNode in thisLayer.selection) or (not thisLayer.selection):
+									del thisPath.nodes[i:i+2]
+									hasRemovedSegments = True # OK to start another pass
+									
+		thisLayer.cleanUpPaths()
 	
 	@objc.python_method
 	def generateCustomParameter( self ):
 		return "%s; maxLength:%.1f; passes:%i" % (
 			self.__class__.__name__,
-			Glyphs.defaults['com.mekkablue.DeleteShortSegments.maxLength'],
-			Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes'],
+			float(Glyphs.defaults['com.mekkablue.DeleteShortSegments.maxLength']),
+			int(Glyphs.defaults['com.mekkablue.DeleteShortSegments.passes']),
 		)
 	
 	@objc.python_method
