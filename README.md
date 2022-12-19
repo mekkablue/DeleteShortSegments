@@ -4,7 +4,7 @@ This is a plugin for the [Glyphs font editor](http://glyphsapp.com/) by Georg Se
 
 ![DeleteShortSegments](DeleteShortSegments.png "Delete Short Segments Screenshot")
 
-*Filter > Delete Short Segments* deletes line segments from your selected paths (or all if none are selected) that are shorter than the specified *Max Length.* This can be very useful for cleaning up roughened paths when you have a grid step finer than 1 unit. Values smaller than 0.1 are treated as 0.1.
+*Filter > Delete Short Segments* deletes line and curve segments from your selected paths (or all if none are selected) that are shorter than the specified *Max Length.* This can be very useful for cleaning up roughened paths when you have a grid step finer than 1 unit. Values smaller than 0.1 are treated as 0.1.
 
 The process is repeated as often as indicated by the *Passes* value you specify. 1 or 2 passes are recommended. Values lower than 1 pass are treated as 1 pass.
 
